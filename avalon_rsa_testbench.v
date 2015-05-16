@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 `define CYCLE      100.0
-`define End_CYCLE  500000      // Modify cycle times once your design need more cycle times!
+`define End_CYCLE  1000000      // Modify cycle times once your design need more cycle times!
 `define TOTAL_DATA 38
 `define TEST_DATA  2
 
@@ -83,7 +83,7 @@ module testbench;
     initial begin
         #0; // t = 0
         clk     = 1'b1;
-		clk_25 = 1'b0;
+		clk_25 = 1'b1;
         reset   = 1'b0; 
         avm_m0_waitrequest      = 1'b0;
         avm_m0_readdata      	= 8'b0;
@@ -106,9 +106,9 @@ module testbench;
             if(avm_m0_read==1) begin
 				if(avm_m0_address<32'd32) begin
 					temp_readdata = dn_mem[0];
-					avm_m0_waitrequest = 1'b1;
-					#(`CYCLE*3);
-					avm_m0_waitrequest = 1'b0;
+					//avm_m0_waitrequest = 1'b1;
+					//#(`CYCLE*3);
+					//avm_m0_waitrequest = 1'b0;
 					#(`CYCLE);
 					avm_m0_readdatavalid = 1;
 					avm_m0_readdata = temp_readdata;
@@ -117,8 +117,8 @@ module testbench;
 				end
 				else if(avm_m0_address<32'd64) begin
 					temp_readdata = dn_mem[1];
-					#(`CYCLE*3);
-					avm_m0_waitrequest = 1'b0;
+					//#(`CYCLE*3);
+					//avm_m0_waitrequest = 1'b0;
 					#(`CYCLE);
 					avm_m0_readdatavalid = 1;
 					avm_m0_readdata = temp_readdata;
@@ -127,8 +127,8 @@ module testbench;
 				end
 				else begin
 					temp_readdata = c_mem[(avm_m0_address-32'd64)/32];
-					#(`CYCLE*3);
-					avm_m0_waitrequest = 1'b0;
+					//#(`CYCLE*3);
+					//avm_m0_waitrequest = 1'b0;
 					#(`CYCLE);
 					avm_m0_readdatavalid = 1;
 					avm_m0_readdata = temp_readdata;

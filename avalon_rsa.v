@@ -87,7 +87,10 @@ module avalon_rsa (
 	
 	wire  clk_25;
 	reg	 flag_reg;
-	reg   next_flag_reg;
+	reg  next_flag_reg;
+	reg  out31_flag;
+	reg	 next_out31_flag;
+	 
 //==== combinational part ==================================
    //next_slow_counter = clk_25 + 1'b1;
     //clksrc clk_rsa(
@@ -105,6 +108,15 @@ module avalon_rsa (
 		else 
 			next_flag_reg = flag_reg;
 	end
+	always@(*) begin
+		if(state==oe_state && core_addr==5'd31 && out31_flag == 1'b0&&  clk_25 == 1'b0)
+			next_out31_flag = 1'b1;
+		else if (out31_flag == 1'b1 &&  clk_25 == 1'b0)
+			next_out31_flag = 1'b0;
+		else
+			next_out31_flag = out31_flag;
+	end
+	
 	assign avs_s0_readdata = {8{flag_reg}};
 	assign avs_s0_waitrequest = 1'b0;
 	
@@ -130,7 +142,7 @@ module avalon_rsa (
 				//if ()
 				//	next_state = idle_state;
 				//else 
-				if (core_addr == 5'd31 && avm_m0_waitrequest == 1'b0 && clk_25 == 1'b0)
+				if (core_addr == 5'd31 && avm_m0_waitrequest == 1'b0 && dram_write == 1)
 					next_state = we_state;
 				else next_state = oe_state;
             end
@@ -175,6 +187,15 @@ module avalon_rsa (
 	
 	// avalon read write signal avm_m0_read avm_m0_write
 	always@(*) begin
+		if (out31_flag == 1'b1  &&  clk_25 == 1'b0)// && slow_counter == 1'b0)
+			next_dram_write = 1'b1;
+		else if(avm_m0_waitrequest == 1'b0)
+			next_dram_write = 1'b0;
+		else 
+			next_dram_addr = dram_addr;
+    end
+	
+	always@(*) begin
 		if (state == idle_state && flag_reg == 1)
 			next_dram_read = 1'b1;
 		else if (state == we_state && avm_m0_waitrequest == 1'd1)// && slow_counter == 1'b0)
@@ -188,11 +209,6 @@ module avalon_rsa (
     end
 	assign avm_m0_read = dram_read;
 	
-	always@(*) begin
-		if (state == oe_state)// && slow_counter == 1'b0)
-			next_dram_write = 1'b1;
-		else next_dram_write = 1'b0;
-    end
 	assign avm_m0_write = dram_write;
 	assign avm_m0_writedata = temp_data_out;
 	
@@ -280,7 +296,7 @@ module avalon_rsa (
 	always@(*) begin
 		if (state == oe_state) begin
 			case(core_addr) 
-				5'd0  : next_temp_data_out[(core_addr-5'd1)*8 +: 8] = core_data_o;
+				5'd0  : next_temp_data_out[(core_addr)*8 +: 8] = core_data_o;
 				5'd1  : next_temp_data_out[(core_addr-5'd1)*8 +: 8] = core_data_o;
 				5'd2  : next_temp_data_out[(core_addr-5'd1)*8 +: 8] = core_data_o;
 				5'd3  : next_temp_data_out[(core_addr-5'd1)*8 +: 8] = core_data_o;
@@ -311,7 +327,11 @@ module avalon_rsa (
 				5'd28 : next_temp_data_out[(core_addr-5'd1)*8 +: 8] = core_data_o;
 				5'd29 : next_temp_data_out[(core_addr-5'd1)*8 +: 8] = core_data_o;
 				5'd30 : next_temp_data_out[(core_addr-5'd1)*8 +: 8] = core_data_o;
-				5'd31 : next_temp_data_out[(core_addr-5'd1)*8 +: 8] = core_data_o;
+				5'd31 : begin
+					if(out31_flag == 1'b0)
+						next_temp_data_out[(core_addr-5'd1)*8 +: 8] = core_data_o;
+					else next_temp_data_out[(core_addr)*8 +: 8] = core_data_o;
+				end
 			endcase
 		end
 		else	
@@ -339,6 +359,7 @@ module avalon_rsa (
 			dram_read = 1'b0;
 			core_start = 1'b0;
 			flag_reg = 1'b0;
+			out31_flag = 1'b0;
 			core_we = 1'b0;
 			core_oe = 1'b0;
 			core_start = 1'b0;
@@ -354,6 +375,7 @@ module avalon_rsa (
 			dram_read = next_dram_read;
 			core_start = next_core_start;
 			flag_reg = next_flag_reg;
+			out31_flag = next_out31_flag;
 			core_we = next_core_we;
 			core_oe = next_core_oe;
 			core_start = next_core_start;
