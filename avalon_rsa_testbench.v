@@ -83,7 +83,7 @@ module testbench;
     initial begin
         #0; // t = 0
         clk     = 1'b1;
-		clk_25 = 1'b1;
+		clk_25 = 1'b0;
         reset   = 1'b0; 
         avm_m0_waitrequest      = 1'b0;
         avm_m0_readdata      	= 8'b0;
@@ -117,6 +117,7 @@ module testbench;
 				end
 				else if(avm_m0_address<32'd64) begin
 					temp_readdata = dn_mem[1];
+					//avm_m0_waitrequest = 1'b1;
 					//#(`CYCLE*3);
 					//avm_m0_waitrequest = 1'b0;
 					#(`CYCLE);
@@ -127,6 +128,7 @@ module testbench;
 				end
 				else begin
 					temp_readdata = c_mem[(avm_m0_address-32'd64)/32];
+					//avm_m0_waitrequest = 1'b1;
 					//#(`CYCLE*3);
 					//avm_m0_waitrequest = 1'b0;
 					#(`CYCLE);
@@ -137,13 +139,17 @@ module testbench;
 				end
             end
             else if(avm_m0_write==1) begin
+					
+					//avm_m0_waitrequest = 1'b1;
+					//#(`CYCLE*3);
+					//avm_m0_waitrequest = 1'b0;
+					#(`CYCLE);
                 //if(avm_m0_writedata !== m_mem[(avm_m0_address-32'd64)/32][(avm_m0_address-32'd64)*8 +: 8]) begin
                     $display("-----------------------------------------------------\n");
                     $display("output %h !== expect %h \n",avm_m0_writedata, m_mem[(avm_m0_address-32'd64)/32]);
                     $display("-----------------------------------------------------\n");
                     //#1;
                     //$finish;'
-					#(`CYCLE);
                 end
 			else begin
 				#(`CYCLE);
