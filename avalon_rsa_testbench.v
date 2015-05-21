@@ -106,9 +106,10 @@ module testbench;
             if(avm_m0_read==1) begin
 				if(avm_m0_address<32'd32) begin
 					temp_readdata = dn_mem[0];
-					//avm_m0_waitrequest = 1'b1;
-					//#(`CYCLE*3);
-					//avm_m0_waitrequest = 1'b0;
+					#(`CYCLE);
+					avm_m0_waitrequest = 1'b1;
+					#(`CYCLE*3);
+					avm_m0_waitrequest = 1'b0;
 					#(`CYCLE);
 					avm_m0_readdatavalid = 1;
 					avm_m0_readdata = temp_readdata;
@@ -117,9 +118,10 @@ module testbench;
 				end
 				else if(avm_m0_address<32'd64) begin
 					temp_readdata = dn_mem[1];
-					//avm_m0_waitrequest = 1'b1;
-					//#(`CYCLE*3);
-					//avm_m0_waitrequest = 1'b0;
+					#(`CYCLE);
+					avm_m0_waitrequest = 1'b1;
+					#(`CYCLE*3);
+					avm_m0_waitrequest = 1'b0;
 					#(`CYCLE);
 					avm_m0_readdatavalid = 1;
 					avm_m0_readdata = temp_readdata;
@@ -128,9 +130,10 @@ module testbench;
 				end
 				else begin
 					temp_readdata = c_mem[(avm_m0_address-32'd64)/32];
-					//avm_m0_waitrequest = 1'b1;
-					//#(`CYCLE*3);
-					//avm_m0_waitrequest = 1'b0;
+					#(`CYCLE);
+					avm_m0_waitrequest = 1'b1;
+					#(`CYCLE*3);
+					avm_m0_waitrequest = 1'b0;
 					#(`CYCLE);
 					avm_m0_readdatavalid = 1;
 					avm_m0_readdata = temp_readdata;
