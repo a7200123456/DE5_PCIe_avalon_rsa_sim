@@ -226,6 +226,8 @@ module avalon_rsa (
 				next_dram_read = 1'b0;
 			else if (core_addr == 5'd31&& avm_m0_readdatavalid == 1'd0)
 				next_dram_read = 1'b1;
+			else
+				next_dram_read = 1'b0;	
 		end
 		else
 			next_dram_read = 1'b0;
@@ -233,7 +235,7 @@ module avalon_rsa (
 	always@(*) begin
 		if (state == we_state && dram_read == 1'b1 && avm_m0_waitrequest == 1'd0 && dram_read_flag == 1'd0)
 			next_dram_read_flag = 1'b1;
-		else if (state == we_state && avm_m0_readdatavalid == 1'd1)
+		else if (avm_m0_readdatavalid == 1'd1)
 			next_dram_read_flag = 1'b0;
 		else
 			next_dram_read_flag = dram_read_flag;
